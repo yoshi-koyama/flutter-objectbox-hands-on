@@ -15,6 +15,7 @@ import 'package:objectbox/objectbox.dart';
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
 import 'model/ShoppingMemo.dart';
+import 'model/ToDo.dart';
 
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
 
@@ -37,6 +38,30 @@ final _entities = <ModelEntity>[
             flags: 0),
         ModelProperty(
             id: const IdUid(3, 7750487792289187867),
+            name: 'check',
+            type: 1,
+            flags: 0)
+      ],
+      relations: <ModelRelation>[],
+      backlinks: <ModelBacklink>[]),
+  ModelEntity(
+      id: const IdUid(2, 1168630501860073183),
+      name: 'ToDo',
+      lastPropertyId: const IdUid(3, 3850136154625575261),
+      flags: 0,
+      properties: <ModelProperty>[
+        ModelProperty(
+            id: const IdUid(1, 7448983422744175293),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        ModelProperty(
+            id: const IdUid(2, 1555600878860989595),
+            name: 'todo',
+            type: 9,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(3, 3850136154625575261),
             name: 'check',
             type: 1,
             flags: 0)
@@ -65,7 +90,7 @@ Future<Store> openStore(
 ModelDefinition getObjectBoxModel() {
   final model = ModelInfo(
       entities: _entities,
-      lastEntityId: const IdUid(1, 6675070774239226741),
+      lastEntityId: const IdUid(2, 1168630501860073183),
       lastIndexId: const IdUid(0, 0),
       lastRelationId: const IdUid(0, 0),
       lastSequenceId: const IdUid(0, 0),
@@ -107,6 +132,36 @@ ModelDefinition getObjectBoxModel() {
             ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
 
           return object;
+        }),
+    ToDo: EntityDefinition<ToDo>(
+        model: _entities[1],
+        toOneRelations: (ToDo object) => [],
+        toManyRelations: (ToDo object) => {},
+        getId: (ToDo object) => object.id,
+        setId: (ToDo object, int id) {
+          object.id = id;
+        },
+        objectToFB: (ToDo object, fb.Builder fbb) {
+          final todoOffset = fbb.writeString(object.todo);
+          fbb.startTable(4);
+          fbb.addInt64(0, object.id);
+          fbb.addOffset(1, todoOffset);
+          fbb.addBool(2, object.check);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+
+          final object = ToDo(
+              todo: const fb.StringReader(asciiOptimization: true)
+                  .vTableGet(buffer, rootOffset, 6, ''),
+              check:
+                  const fb.BoolReader().vTableGet(buffer, rootOffset, 8, false))
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+
+          return object;
         })
   };
 
@@ -126,4 +181,16 @@ class ShoppingMemo_ {
   /// see [ShoppingMemo.check]
   static final check =
       QueryBooleanProperty<ShoppingMemo>(_entities[0].properties[2]);
+}
+
+/// [ToDo] entity fields to define ObjectBox queries.
+class ToDo_ {
+  /// see [ToDo.id]
+  static final id = QueryIntegerProperty<ToDo>(_entities[1].properties[0]);
+
+  /// see [ToDo.todo]
+  static final todo = QueryStringProperty<ToDo>(_entities[1].properties[1]);
+
+  /// see [ToDo.check]
+  static final check = QueryBooleanProperty<ToDo>(_entities[1].properties[2]);
 }
