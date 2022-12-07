@@ -20,9 +20,6 @@ class _ToDoPageState extends State<ToDoPage> {
   // 投稿後の内容を削除するためのもの
   final controller = TextEditingController();
 
-  // ToDo 要修正
-  List<String> sampleList = ["hoge", "fuga", "piyo"];
-
   Future<void> initialize() async {
     // storeの作成にopenStore()という非同期関数の実行が必要
     store = await openStore();
